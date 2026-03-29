@@ -27,7 +27,7 @@ public class Conexion {
             //si se conecta pero, como se llama esta función para poder hacer los elementos de ABC
             //el mensaje aparece cuando haces cualquier acción
             //si crees que no esta conectado/ hay algun error con la BD, quitale el comentario
-            System.out.println("Se conecto correctamente con la base de datos");
+            //System.out.println("Se conecto correctamente con la base de datos");
             
         } catch(Exception e){
             JOptionPane.showMessageDialog(null, "No se pudo conectar con la base de datos \n Error:" + e.toString());

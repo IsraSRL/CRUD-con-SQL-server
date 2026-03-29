@@ -79,6 +79,10 @@ public class jfrmPrincipal extends javax.swing.JFrame {
         jtxtSecreto.setText("");
     }
     
+    public void LimpiarLog()
+    {
+        jtxaLog.setText("");
+    }
     
     public void AutoActualizar()
     {
@@ -100,6 +104,13 @@ public class jfrmPrincipal extends javax.swing.JFrame {
             }
 
         }).start();
+    }
+    //funcion para mostrar un log de transacciones
+    public void log(String mensaje)
+    {
+        SwingUtilities.invokeLater(() -> {
+            jtxaLog.append(mensaje + "\n");
+        });
     }
     
     public void probarDeadlock(int primerId, int segundoId)
@@ -130,18 +141,18 @@ public class jfrmPrincipal extends javax.swing.JFrame {
 
             st.execute(abrirLlave);
 
-            System.out.println("Bloqueando alumno " + primerId);
+            log("Bloqueando alumno " + primerId);
 
             ps1 = con.prepareStatement(update);
             ps1.setString(1, "Usuario " + primerId);
             ps1.setInt(2, primerId);
             ps1.executeUpdate();
 
-            System.out.println("Esperando 5 segundos...");
+            log("Esperando 5 segundos...");
 
             Thread.sleep(5000);
 
-            System.out.println("Intentando bloquear alumno " + segundoId);
+            log("Intentando bloquear alumno " + segundoId);
 
             ps2 = con.prepareStatement(update);
             ps2.setString(1, "Usuario " + segundoId);
@@ -218,6 +229,9 @@ public class jfrmPrincipal extends javax.swing.JFrame {
         jtxtSecreto = new javax.swing.JTextField();
         jbtnDeadlock = new javax.swing.JButton();
         jbtnDeadlock1 = new javax.swing.JButton();
+        jSeparator2 = new javax.swing.JSeparator();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jtxaLog = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(204, 255, 255));
@@ -328,6 +342,12 @@ public class jfrmPrincipal extends javax.swing.JFrame {
             }
         });
 
+        jSeparator2.setForeground(new java.awt.Color(0, 0, 0));
+
+        jtxaLog.setColumns(20);
+        jtxaLog.setRows(5);
+        jScrollPane1.setViewportView(jtxaLog);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -341,7 +361,7 @@ public class jfrmPrincipal extends javax.swing.JFrame {
                         .addGap(216, 216, 216)
                         .addComponent(jLabel5)))
                 .addGap(18, 18, 18)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 3, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 10, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
@@ -377,50 +397,60 @@ public class jfrmPrincipal extends javax.swing.JFrame {
                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                     .addComponent(jtxtSecreto, javax.swing.GroupLayout.PREFERRED_SIZE, 207, javax.swing.GroupLayout.PREFERRED_SIZE))))
                         .addGap(31, 31, 31))))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPane1)
+                    .addComponent(jSeparator2))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(10, 10, 10)
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 324, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel4)
-                                    .addComponent(jbtnDeadlock1))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel6))
-                            .addComponent(jbtnDeadlock))
-                        .addGap(30, 30, 30)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel2)
-                            .addComponent(jtxtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel3)
-                            .addComponent(jtxtCorreo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel7)
-                            .addComponent(jtxtSecreto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jbtnAgregar)
-                            .addComponent(jbtnBorrar))
-                        .addGap(39, 39, 39)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jbtnLimpiar)
-                            .addComponent(jbtnCambiar))
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel1))
-                    .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 368, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGroup(layout.createSequentialGroup()
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jLabel4)
+                                        .addComponent(jbtnDeadlock1))
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(jLabel6))
+                                .addComponent(jbtnDeadlock))
+                            .addGap(30, 30, 30)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel2)
+                                .addComponent(jtxtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGap(18, 18, 18)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel3)
+                                .addComponent(jtxtCorreo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGap(18, 18, 18)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel7)
+                                .addComponent(jtxtSecreto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGap(39, 39, 39)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addComponent(jbtnAgregar)
+                                .addComponent(jbtnBorrar))
+                            .addGap(39, 39, 39)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jbtnLimpiar)
+                                .addComponent(jbtnCambiar))
+                            .addGap(18, 18, 18)
+                            .addComponent(jLabel1))
+                        .addComponent(jSeparator1)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 264, Short.MAX_VALUE))
         );
 
         pack();
@@ -440,6 +470,7 @@ public class jfrmPrincipal extends javax.swing.JFrame {
         // TODO add your handling code here:
         //limpiar los datos
         LimpiarCampo();
+        LimpiarLog();
     }//GEN-LAST:event_jbtnLimpiarActionPerformed
 
     private void jbtnBorrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnBorrarActionPerformed
@@ -464,7 +495,9 @@ public class jfrmPrincipal extends javax.swing.JFrame {
         
         try
         {
+            log("ejecutando una eliminación de registro");
             con = Conexion.ConectarBD();
+            log("conexion con la base de datos exitosa");
             
             //control transaccional
             con.setAutoCommit(false);
@@ -478,6 +511,7 @@ public class jfrmPrincipal extends javax.swing.JFrame {
             con.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             
             //borrar
+            log("borrando al alumno: " + jtbtDatos.getValueAt(tupla, 1).toString());
             ps = con.prepareStatement(borrar);
             
             ps.setInt(1, id);
@@ -485,6 +519,7 @@ public class jfrmPrincipal extends javax.swing.JFrame {
             
             //commit
             con.commit();
+            log("commit ejecutado - alumno eliminado");
             
             JOptionPane.showMessageDialog(this, "Alumno eliminado");
             Cargar();
@@ -494,7 +529,11 @@ public class jfrmPrincipal extends javax.swing.JFrame {
 
             try {
                 if(con != null)//llama un rollback
+                {
+                    log("error detectado - ejecutando rollback");
                     con.rollback();
+                    log("rollback exitoso");
+                }
             } catch(Exception e){
                 JOptionPane.showMessageDialog(null, e.toString());
             }
@@ -544,7 +583,9 @@ public class jfrmPrincipal extends javax.swing.JFrame {
         
         try
         {
+            log("Iniciando inserción");
             con = Conexion.ConectarBD();
+            log("conexion con la base de datos establecida");
             
             //control de transacciones
             con.setAutoCommit(false);
@@ -555,11 +596,13 @@ public class jfrmPrincipal extends javax.swing.JFrame {
             st.execute("SET LOCK_TIMEOUT 5000");
             
             st.execute(abrirLlave);
+            log("llave de encriptación abierta");
             
             //nivel de aislamiento
             con.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             
             //insertar en la BD
+            log("insertando en la tabla alumno...");
             ps = con.prepareStatement(agregar);
             
             ps.setString(1, nombre);
@@ -568,10 +611,12 @@ public class jfrmPrincipal extends javax.swing.JFrame {
             ps.executeUpdate();
             
             st.execute(cerrarLlave);
+            log("llave de encriptación cerrada");
             
             Thread.sleep(1000);
             //confirmar transaccion
             con.commit();
+            log("commit ejecutado - alumno agregado");
             
             JOptionPane.showMessageDialog(this, "Alumno agregado");
             Cargar();
@@ -585,7 +630,11 @@ public class jfrmPrincipal extends javax.swing.JFrame {
                     st.execute(cerrarLlave);
 
                 if(con != null) //hace un rollback (si es necesario)
+                {
+                    log("error detectado - ejecutando rollback");
                     con.rollback();
+                    log("rollback exitoso");
+                }
 
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, e.toString());
@@ -652,7 +701,10 @@ public class jfrmPrincipal extends javax.swing.JFrame {
         
         try
         {
+            log("iniciando modificación de registros");
+            
             con = Conexion.ConectarBD();
+            log("conexion con la base de datos establecida");
             
             //autocommit falso
             con.setAutoCommit(false);
@@ -664,11 +716,13 @@ public class jfrmPrincipal extends javax.swing.JFrame {
             st.execute("SET LOCK_TIMEOUT 5000");
             
             st.execute(abrirLlave);
+            log("llave de encriptación abierta");
             
             //nivel de aislamiento
             con.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             
             //modificar
+            log("modificando el registro de la tabla alumnos...");
             ps = con.prepareStatement(update);
             
             ps.setString(1, jtxtNombre.getText());
@@ -679,10 +733,12 @@ public class jfrmPrincipal extends javax.swing.JFrame {
             
             //cerrar llave
             st.execute(cerrarLlave);
+            log("llave de encriptación cerrada");
             
             Thread.sleep(5000);
             //confirmar transaccion
             con.commit();
+            log("commit ejecutado - alumno modificado");
             
             JOptionPane.showMessageDialog(this, "Alumno actualizado");
             Cargar();
@@ -696,7 +752,11 @@ public class jfrmPrincipal extends javax.swing.JFrame {
                     st.execute(cerrarLlave);
 
                 if(con != null)
+                {
+                    log("error detectado - ejecutando rollback");
                     con.rollback();
+                    log("rollback exitoso");
+                }
 
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, e.toString());
@@ -782,8 +842,10 @@ public class jfrmPrincipal extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSeparator jSeparator2;
     private javax.swing.JButton jbtnAgregar;
     public javax.swing.JButton jbtnBorrar;
     private javax.swing.JButton jbtnCambiar;
@@ -791,6 +853,7 @@ public class jfrmPrincipal extends javax.swing.JFrame {
     private javax.swing.JButton jbtnDeadlock1;
     private javax.swing.JButton jbtnLimpiar;
     private javax.swing.JTable jtbtDatos;
+    private javax.swing.JTextArea jtxaLog;
     private javax.swing.JTextField jtxtCorreo;
     private javax.swing.JTextField jtxtNombre;
     private javax.swing.JTextField jtxtSecreto;
