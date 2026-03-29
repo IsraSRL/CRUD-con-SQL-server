@@ -128,6 +128,8 @@ public class jfrmPrincipal extends javax.swing.JFrame {
 
         try {
 
+            log("=========================");
+            log("prueba de bloqueo circular");
             con = Conexion.ConectarBD();
 
             con.setAutoCommit(false);
@@ -495,6 +497,7 @@ public class jfrmPrincipal extends javax.swing.JFrame {
         
         try
         {
+            log("============================");
             log("ejecutando una eliminación de registro");
             con = Conexion.ConectarBD();
             log("conexion con la base de datos exitosa");
@@ -583,6 +586,7 @@ public class jfrmPrincipal extends javax.swing.JFrame {
         
         try
         {
+            log("============================");
             log("Iniciando inserción");
             con = Conexion.ConectarBD();
             log("conexion con la base de datos establecida");
@@ -701,6 +705,7 @@ public class jfrmPrincipal extends javax.swing.JFrame {
         
         try
         {
+            log("============================");
             log("iniciando modificación de registros");
             
             con = Conexion.ConectarBD();
