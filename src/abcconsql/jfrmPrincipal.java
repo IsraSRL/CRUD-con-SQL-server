@@ -45,9 +45,8 @@ public class jfrmPrincipal extends javax.swing.JFrame {
                 "OPEN SYMMETRIC KEY llave1 " +
                 "DECRYPTION BY CERTIFICATE certificado1 " +
                 
-                "SELECT id, Nombre, Correo, " +
-                "Convert(NVARCHAR, decryptByKey(SecretoEncriptado)) as Secreto " +
-                "FROM alumnos " +
+                //se cambio toda la consulta que habia por mejor mostrar una vista
+                "SELECT * from DatosGenerales " +
                 
                 "CLOSE SYMMETRIC KEY llave1 " +
                 "END";
@@ -60,12 +59,16 @@ public class jfrmPrincipal extends javax.swing.JFrame {
             while(rs.next())
             {
                 Object [] tupla = new Object [4];
-                tupla[0] = rs.getInt("id");
+                tupla[0] = rs.getInt("Id");
                 tupla[1] = rs.getString("Nombre");
                 tupla[2] = rs.getString("Correo");
                 tupla[3] = rs.getString("Secreto");
                 modelo.addRow(tupla);
             }
+            
+            jtbtDatos.getColumnModel().getColumn(0).setMinWidth(0);
+            jtbtDatos.getColumnModel().getColumn(0).setWidth(0);
+            jtbtDatos.getColumnModel().getColumn(0).setMaxWidth(0);
             
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, ex.toString());
@@ -92,10 +95,17 @@ public class jfrmPrincipal extends javax.swing.JFrame {
             {
                 try {
 
-                    Thread.sleep(3000);
+                    Thread.sleep(2000);
 
                     SwingUtilities.invokeLater(() -> {
+                        int tupla = jtbtDatos.getSelectedRow();
+                        
                         Cargar();
+                        
+                        if(tupla != -1 && tupla < jtbtDatos.getRowCount())
+                        {
+                            jtbtDatos.setRowSelectionInterval(tupla, tupla);
+                        }
                     });
 
                 } catch (Exception e) {
@@ -212,6 +222,7 @@ public class jfrmPrincipal extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jInternalFrame1 = new javax.swing.JInternalFrame();
         jbtnAgregar = new javax.swing.JButton();
         jbtnBorrar = new javax.swing.JButton();
         jbtnLimpiar = new javax.swing.JButton();
@@ -234,6 +245,23 @@ public class jfrmPrincipal extends javax.swing.JFrame {
         jSeparator2 = new javax.swing.JSeparator();
         jScrollPane1 = new javax.swing.JScrollPane();
         jtxaLog = new javax.swing.JTextArea();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        jmitHistorial = new javax.swing.JMenuItem();
+        jmitSalir = new javax.swing.JMenuItem();
+
+        jInternalFrame1.setVisible(true);
+
+        javax.swing.GroupLayout jInternalFrame1Layout = new javax.swing.GroupLayout(jInternalFrame1.getContentPane());
+        jInternalFrame1.getContentPane().setLayout(jInternalFrame1Layout);
+        jInternalFrame1Layout.setHorizontalGroup(
+            jInternalFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        jInternalFrame1Layout.setVerticalGroup(
+            jInternalFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(204, 255, 255));
@@ -295,7 +323,7 @@ public class jfrmPrincipal extends javax.swing.JFrame {
 
             },
             new String [] {
-                "ID", "Nombre", "Correo", "Secreto"
+                "Nombre", "Correo", "Secreto"
             }
         ));
         jtbtDatos.setShowGrid(true);
@@ -305,9 +333,6 @@ public class jfrmPrincipal extends javax.swing.JFrame {
             }
         });
         jScrollPane2.setViewportView(jtbtDatos);
-        if (jtbtDatos.getColumnModel().getColumnCount() > 0) {
-            jtbtDatos.getColumnModel().getColumn(0).setPreferredWidth(10);
-        }
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel1.setText("Kevin Israel Serrano Lugo #24130793");
@@ -349,6 +374,28 @@ public class jfrmPrincipal extends javax.swing.JFrame {
         jtxaLog.setColumns(20);
         jtxaLog.setRows(5);
         jScrollPane1.setViewportView(jtxaLog);
+
+        jMenu1.setText("Archivo");
+
+        jmitHistorial.setText("Historial Cambios");
+        jmitHistorial.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmitHistorialActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jmitHistorial);
+
+        jmitSalir.setText("Salir");
+        jmitSalir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmitSalirActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jmitSalir);
+
+        jMenuBar1.add(jMenu1);
+
+        setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -452,7 +499,7 @@ public class jfrmPrincipal extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 264, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 241, Short.MAX_VALUE))
         );
 
         pack();
@@ -489,7 +536,10 @@ public class jfrmPrincipal extends javax.swing.JFrame {
         
         //borrar en sql
         //borrar no se modifico pq no es necesario desencriptar algo que vas a borrar
-        String borrar = "DELETE FROM alumnos WHERE id=?";
+        //dejo el borrar original nomas para que vean lo simple que era
+        //Y que fue reemplazado por un SP
+        //String borrar = "DELETE FROM alumnos WHERE id=?";
+        String borrar = "{CALL eliminar(?)}";
         
         Connection con = null;
         PreparedStatement ps = null;
@@ -573,10 +623,8 @@ public class jfrmPrincipal extends javax.swing.JFrame {
         return;
         }
         //comandos SQL
-        String abrirLlave = "open symmetric key llave1 decryption by certificate certificado1";
-        String agregar = 
-                "insert into alumnos(Nombre, Correo, SecretoEncriptado) " +
-                "values(?,?, EncryptByKey(Key_GUID('llave1'),?)) ";
+        //String abrirLlave = "open symmetric key llave1 decryption by certificate certificado1";
+        String agregar = "{CALL insertar(?,?,?)} "; //ahora agregar es un metodo almacenado
         String cerrarLlave = "close symmetric key llave1";
         
         
@@ -599,7 +647,7 @@ public class jfrmPrincipal extends javax.swing.JFrame {
             // timeout de bloqueo
             st.execute("SET LOCK_TIMEOUT 5000");
             
-            st.execute(abrirLlave);
+            //st.execute(abrirLlave);
             log("llave de encriptación abierta");
             
             //nivel de aislamiento
@@ -614,7 +662,7 @@ public class jfrmPrincipal extends javax.swing.JFrame {
             ps.setString(3, secreto);
             ps.executeUpdate();
             
-            st.execute(cerrarLlave);
+            //st.execute(cerrarLlave);
             log("llave de encriptación cerrada");
             
             Thread.sleep(1000);
@@ -691,13 +739,10 @@ public class jfrmPrincipal extends javax.swing.JFrame {
         //String update = "UPDATE alumnos SET Nombre=?, Correo=?, Secreto=? WHERE Id=?";
         
         //update con encriptado
-        String abrirLlave = "open symmetric key llave1 decryption by certificate certificado1";
-        String update = 
-                "update alumnos set Nombre=?, Correo=?, " +
-                "SecretoEncriptado=  EncryptByKey(Key_GUID('llave1'),?) " +
-                
-                "where id = ? ";
+        //String abrirLlave = "open symmetric key llave1 decryption by certificate certificado1";
+        String update = "{CALL actualizar(?,?,?,?)}";//procedimiento almacenado: actualizar
         String cerrarLlave = "close symmetric key llave1";
+        //DENTRO DEL SP YA ABRO Y CIERRO LAS LLAVES
         
         Connection con = null;
         PreparedStatement ps = null;
@@ -705,6 +750,7 @@ public class jfrmPrincipal extends javax.swing.JFrame {
         
         try
         {
+            
             log("============================");
             log("iniciando modificación de registros");
             
@@ -720,7 +766,7 @@ public class jfrmPrincipal extends javax.swing.JFrame {
             // timeout de bloqueo
             st.execute("SET LOCK_TIMEOUT 5000");
             
-            st.execute(abrirLlave);
+            //st.execute(abrirLlave);
             log("llave de encriptación abierta");
             
             //nivel de aislamiento
@@ -728,16 +774,16 @@ public class jfrmPrincipal extends javax.swing.JFrame {
             
             //modificar
             log("modificando el registro de la tabla alumnos...");
-            ps = con.prepareStatement(update);
+            ps = con.prepareStatement(update);//por como se creo el procedimient ahora id va a ser el 1
             
-            ps.setString(1, jtxtNombre.getText());
-            ps.setString(2, jtxtCorreo.getText());
-            ps.setString(3, jtxtSecreto.getText());
-            ps.setInt(4, id);
+            ps.setInt(1, id);
+            ps.setString(2, jtxtNombre.getText());
+            ps.setString(3, jtxtCorreo.getText());
+            ps.setString(4, jtxtSecreto.getText());
             ps.executeUpdate();
             
             //cerrar llave
-            st.execute(cerrarLlave);
+            //st.execute(cerrarLlave);
             log("llave de encriptación cerrada");
             
             Thread.sleep(5000);
@@ -804,6 +850,18 @@ public class jfrmPrincipal extends javax.swing.JFrame {
         }).start();
     }//GEN-LAST:event_jbtnDeadlock1ActionPerformed
 
+    private void jmitSalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmitSalirActionPerformed
+        // TODO add your handling code here:
+        System.exit(0);
+    }//GEN-LAST:event_jmitSalirActionPerformed
+
+    private void jmitHistorialActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmitHistorialActionPerformed
+        // TODO add your handling code here:
+        jfrmHistorial historial = new jfrmHistorial();
+        historial.setVisible(true);
+        historial.setLocationRelativeTo(null);
+    }//GEN-LAST:event_jmitHistorialActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -840,6 +898,7 @@ public class jfrmPrincipal extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JInternalFrame jInternalFrame1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -847,6 +906,8 @@ public class jfrmPrincipal extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
@@ -857,6 +918,8 @@ public class jfrmPrincipal extends javax.swing.JFrame {
     private javax.swing.JButton jbtnDeadlock;
     private javax.swing.JButton jbtnDeadlock1;
     private javax.swing.JButton jbtnLimpiar;
+    private javax.swing.JMenuItem jmitHistorial;
+    private javax.swing.JMenuItem jmitSalir;
     private javax.swing.JTable jtbtDatos;
     private javax.swing.JTextArea jtxaLog;
     private javax.swing.JTextField jtxtCorreo;
