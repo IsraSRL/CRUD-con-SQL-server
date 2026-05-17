@@ -7,6 +7,8 @@ import java.sql.*;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
+import javax.sql.rowset.CachedRowSet;
+import java.sql.Connection;
 
 /**
  *
@@ -36,33 +38,19 @@ public class jfrmPrincipal extends javax.swing.JFrame {
 
         jtbtDatos.setModel(modelo);
         
-        //select sin desencriptar
-        //String sql = "SELECT * FROM alumnos";
         
-        //select que si desencripta
-        String sql = 
-                "BEGIN " +
-                "OPEN SYMMETRIC KEY llave1 " +
-                "DECRYPTION BY CERTIFICATE certificado1 " +
-                
-                //se cambio toda la consulta que habia por mejor mostrar una vista
-                "SELECT * from DatosGenerales " +
-                
-                "CLOSE SYMMETRIC KEY llave1 " +
-                "END";
-        
-        try (Connection con = Conexion.ConectarBD();
-                Statement st = con.createStatement();
-                ResultSet rs = st.executeQuery(sql))
+        try
         {
+            //muestra los datos con un cachedRowSet para el modo desconectado(unidad 7)
+            CachedRowSet crs = Conexion.getRowSetConLlave();
             
-            while(rs.next())
+            while(crs.next())
             {
                 Object [] tupla = new Object [4];
-                tupla[0] = rs.getInt("Id");
-                tupla[1] = rs.getString("Nombre");
-                tupla[2] = rs.getString("Correo");
-                tupla[3] = rs.getString("Secreto");
+                tupla[0] = crs.getInt("Id");
+                tupla[1] = crs.getString("Nombre");
+                tupla[2] = crs.getString("Correo");
+                tupla[3] = crs.getString("Secreto");
                 modelo.addRow(tupla);
             }
             
@@ -102,6 +90,7 @@ public class jfrmPrincipal extends javax.swing.JFrame {
                         
                         Cargar();
                         
+                        //mantiene la fila seleccionada
                         if(tupla != -1 && tupla < jtbtDatos.getRowCount())
                         {
                             jtbtDatos.setRowSelectionInterval(tupla, tupla);
@@ -537,41 +526,22 @@ public class jfrmPrincipal extends javax.swing.JFrame {
         //borrar en sql
         //borrar no se modifico pq no es necesario desencriptar algo que vas a borrar
         //dejo el borrar original nomas para que vean lo simple que era
-        //Y que fue reemplazado por un SP
         //String borrar = "DELETE FROM alumnos WHERE id=?";
-        String borrar = "{CALL eliminar(?)}";
-        
         Connection con = null;
         PreparedStatement ps = null;
         Statement st = null;
         
         try
         {
+            alumnoDAO dao = new alumnoDAO();
             log("============================");
             log("ejecutando una eliminación de registro");
-            con = Conexion.ConectarBD();
             log("conexion con la base de datos exitosa");
-            
-            //control transaccional
-            con.setAutoCommit(false);
-            
-            //timeout para lo circular
-            st = con.createStatement();
-            
-            st.execute("SET LOCK_TIMEOUT 5000");
-            
-            //aislamiento
-            con.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             
             //borrar
             log("borrando al alumno: " + jtbtDatos.getValueAt(tupla, 1).toString());
-            ps = con.prepareStatement(borrar);
+            dao.eliminarAlumno(id);
             
-            ps.setInt(1, id);
-            ps.executeUpdate();
-            
-            //commit
-            con.commit();
             log("commit ejecutado - alumno eliminado");
             
             JOptionPane.showMessageDialog(this, "Alumno eliminado");
@@ -579,35 +549,7 @@ public class jfrmPrincipal extends javax.swing.JFrame {
             LimpiarCampo();
             
         } catch(Exception ex) {
-
-            try {
-                if(con != null)//llama un rollback
-                {
-                    log("error detectado - ejecutando rollback");
-                    con.rollback();
-                    log("rollback exitoso");
-                }
-            } catch(Exception e){
-                JOptionPane.showMessageDialog(null, e.toString());
-            }
-
             JOptionPane.showMessageDialog(null, ex.toString());
-        }
-        finally {//cerrar todo
-
-            try {
-
-                if(ps != null)
-                    ps.close();
-
-                if(con != null){
-                    con.setAutoCommit(true);
-                    con.close();
-                }
-
-            } catch(Exception e2){
-                JOptionPane.showMessageDialog(null, e2.toString());
-            }
         }
     }//GEN-LAST:event_jbtnBorrarActionPerformed
 
@@ -623,51 +565,19 @@ public class jfrmPrincipal extends javax.swing.JFrame {
         return;
         }
         //comandos SQL
-        //String abrirLlave = "open symmetric key llave1 decryption by certificate certificado1";
-        String agregar = "{CALL insertar(?,?,?)} "; //ahora agregar es un metodo almacenado
-        String cerrarLlave = "close symmetric key llave1";
-        
-        
-        Connection con = null;
-        PreparedStatement ps = null;
-        Statement st = null;
+        alumnoDAO dao = new alumnoDAO();
         
         try
         {
             log("============================");
             log("Iniciando inserción");
-            con = Conexion.ConectarBD();
             log("conexion con la base de datos establecida");
-            
-            //control de transacciones
-            con.setAutoCommit(false);
-            
-            st = con.createStatement();
-            
-            // timeout de bloqueo
-            st.execute("SET LOCK_TIMEOUT 5000");
-            
-            //st.execute(abrirLlave);
-            log("llave de encriptación abierta");
-            
-            //nivel de aislamiento
-            con.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             
             //insertar en la BD
             log("insertando en la tabla alumno...");
-            ps = con.prepareStatement(agregar);
+            dao.insertarAlumno(nombre, correo, secreto);
             
-            ps.setString(1, nombre);
-            ps.setString(2, correo);
-            ps.setString(3, secreto);
-            ps.executeUpdate();
-            
-            //st.execute(cerrarLlave);
             log("llave de encriptación cerrada");
-            
-            Thread.sleep(1000);
-            //confirmar transaccion
-            con.commit();
             log("commit ejecutado - alumno agregado");
             
             JOptionPane.showMessageDialog(this, "Alumno agregado");
@@ -675,43 +585,7 @@ public class jfrmPrincipal extends javax.swing.JFrame {
             LimpiarCampo();
             
         } catch (Exception ex) {
-
-            try {
-
-                if(st != null)//cierra la llave
-                    st.execute(cerrarLlave);
-
-                if(con != null) //hace un rollback (si es necesario)
-                {
-                    log("error detectado - ejecutando rollback");
-                    con.rollback();
-                    log("rollback exitoso");
-                }
-
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, e.toString());
-            }
-
             JOptionPane.showMessageDialog(null, ex.toString());
-        }
-        finally { //cerrar todo al final
-
-            try {
-
-                if(ps != null)
-                    ps.close();
-
-                if(st != null)
-                    st.close();
-
-                if(con != null){
-                    con.setAutoCommit(true);
-                    con.close();
-                }
-
-            } catch (Exception e2) {
-                JOptionPane.showMessageDialog(null, e2.toString());
-            }
         }
     }//GEN-LAST:event_jbtnAgregarActionPerformed
 
@@ -734,15 +608,11 @@ public class jfrmPrincipal extends javax.swing.JFrame {
             return;
         }
         
-        int id = Integer.parseInt(jtbtDatos.getValueAt(tupla, 0).toString());
         //update sin encriptar
         //String update = "UPDATE alumnos SET Nombre=?, Correo=?, Secreto=? WHERE Id=?";
         
         //update con encriptado
-        //String abrirLlave = "open symmetric key llave1 decryption by certificate certificado1";
         String update = "{CALL actualizar(?,?,?,?)}";//procedimiento almacenado: actualizar
-        String cerrarLlave = "close symmetric key llave1";
-        //DENTRO DEL SP YA ABRO Y CIERRO LAS LLAVES
         
         Connection con = null;
         PreparedStatement ps = null;
@@ -750,45 +620,21 @@ public class jfrmPrincipal extends javax.swing.JFrame {
         
         try
         {
-            
+            int id = Integer.parseInt(jtbtDatos.getValueAt(tupla, 0).toString());
+            alumnoDAO dao = new alumnoDAO();
             log("============================");
             log("iniciando modificación de registros");
-            
-            con = Conexion.ConectarBD();
             log("conexion con la base de datos establecida");
-            
-            //autocommit falso
-            con.setAutoCommit(false);
-            
-            //abrir llave
-            st = con.createStatement();
-            
             // timeout de bloqueo
             st.execute("SET LOCK_TIMEOUT 5000");
-            
             //st.execute(abrirLlave);
             log("llave de encriptación abierta");
             
-            //nivel de aislamiento
-            con.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-            
             //modificar
             log("modificando el registro de la tabla alumnos...");
-            ps = con.prepareStatement(update);//por como se creo el procedimient ahora id va a ser el 1
+            dao.actualizarAlumno(id, jtxtNombre.getText(), jtxtCorreo.getText(), jtxtSecreto.getText());
             
-            ps.setInt(1, id);
-            ps.setString(2, jtxtNombre.getText());
-            ps.setString(3, jtxtCorreo.getText());
-            ps.setString(4, jtxtSecreto.getText());
-            ps.executeUpdate();
             
-            //cerrar llave
-            //st.execute(cerrarLlave);
-            log("llave de encriptación cerrada");
-            
-            Thread.sleep(5000);
-            //confirmar transaccion
-            con.commit();
             log("commit ejecutado - alumno modificado");
             
             JOptionPane.showMessageDialog(this, "Alumno actualizado");
@@ -796,43 +642,7 @@ public class jfrmPrincipal extends javax.swing.JFrame {
             LimpiarCampo();
             
         } catch (Exception ex) {
-
-            try {
-
-                if(st != null)
-                    st.execute(cerrarLlave);
-
-                if(con != null)
-                {
-                    log("error detectado - ejecutando rollback");
-                    con.rollback();
-                    log("rollback exitoso");
-                }
-
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, e.toString());
-            }
-
             JOptionPane.showMessageDialog(null, ex.toString());
-        }
-        finally {
-
-            try {
-
-                if(ps != null)
-                    ps.close();
-
-                if(st != null)
-                    st.close();
-
-                if(con != null){
-                    con.setAutoCommit(true);
-                    con.close();
-                }
-
-            } catch (Exception e2) {
-                JOptionPane.showMessageDialog(null, e2.toString());
-            }
         }
     }//GEN-LAST:event_jbtnCambiarActionPerformed
 

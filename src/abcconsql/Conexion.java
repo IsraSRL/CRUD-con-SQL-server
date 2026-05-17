@@ -4,9 +4,13 @@
  */
 package abcconsql;
 
+import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import javax.swing.JOptionPane;
+import javax.sql.rowset.CachedRowSet;
+import javax.sql.rowset.RowSetProvider;
+import java.sql.ResultSet;
 
 /**
  *
@@ -34,6 +38,34 @@ public class Conexion {
         }
         
         return conectar;
+    }
+    
+    //metodo para la unidad 7
+    public static CachedRowSet getRowSetConLlave() throws Exception
+    {
+        Connection con = Conexion.ConectarBD();
+        Statement st = con.createStatement();
+
+        String sql = 
+            "OPEN SYMMETRIC KEY llave1 " +
+            "DECRYPTION BY CERTIFICATE certificado1; " +
+
+            "SELECT * FROM DatosGenerales; " +
+
+            "CLOSE SYMMETRIC KEY llave1;";
+
+        st.execute(sql);
+
+        ResultSet rs = st.getResultSet();
+
+        CachedRowSet crs = RowSetProvider.newFactory().createCachedRowSet();
+        crs.populate(rs);
+
+        rs.close();
+        st.close();
+        con.close();
+
+        return crs;
     }
     
 }
